@@ -29,6 +29,14 @@ app.get('/api', function(req, res) {
       message: data   //pythonで実施した演算結果をフロントエンドに返している。
     })
   })
+
+  // end the input stream and allow the process to exit
+  pyshell.end(function (err,code,signal) {
+    if (err) throw err
+    console.log('The exit code was: ' + code)
+    console.log('The exit signal was: ' + signal)
+    console.log('finished')
+  })
 })
 
 app.listen(3000)
