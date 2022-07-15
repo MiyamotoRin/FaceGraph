@@ -5,4 +5,4 @@ num=int(data)
 def sum(a):
     return a+3
 
-print(sum(num))  #printの内容をpython-shellに返却する
+print(sum(num))  #printの内容をpython-shellに返却するaa
