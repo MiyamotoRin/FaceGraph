@@ -1,41 +1,81 @@
 <template>
   <div>
-    <label v-if="!value" class="upload-content-space user-photo default">
-      <input ref="file" class="file-button" type="file" @change="imgUpload" />
-      画像アップロードする
-    </label>
+    <div v-if="!value" class="mid-block">
+      <div class="right-block">
+        <p>貴方の顔<br />&nbsp;歪めてみませんか・・・</p>
+        <label v-if="!value" class="upload-content-space user-photo default">
+          <input
+            ref="file"
+            class="file-button"
+            type="file"
+            @change="imgUpload"
+          />
+          画像を選択する
+        </label>
 
-    <label v-if='imgFile'>{{imgFile}}</label>
+        <label v-if="!csvFile" class="upload-content-space user-photo default">
+          <input
+            ref="file"
+            class="file-button"
+            type="file"
+            @change="csvUpload"
+          />
+          csvファイルを選択する
+        </label>
 
-    <button type="button" class="delete-button" @click="deleteImg">
-      削除する
-    </button>
+        <label v-if="csvFile">{{ csvFile }}</label>
 
-    <label v-if="!value" class="upload-content-space user-photo default">
-      <input ref="file" class="file-button" type="file" @change="csvUpload" />
-      csvファイルをアップロードする
-    </label>
-
-    <label v-if='csvFile'>{{csvFile}}</label>
-
-    <button type='button' class='delete-button' @click='deleteCsv'>
-      削除する
-    </button>
-
-    <label class="upload-content-space user-photo default">
-      <input class="file-button" @click="postData" />
-      作成する
-    </label>
-
-    <div v-if='value' class='uploaded'>
-      <label class='upload-content-space user-photo'>
-        <input ref='file' class='file-button' type='file' @change='imgUpload' />
-        <img class='user-photo-image' :src='value' />
-      </label>
+        <label class="upload-content-space user-photo default">
+          <input class="file-button" @click="postData" />
+          作成する
+        </label>
+      </div>
+      <div class="left-block">
+        <div class="sample-photo">
+          <img src="../assets/sampleDistort.png" />
+        </div>
+      </div>
     </div>
 
-    <ul v-if='fileErrorMessages.length > 0' class='error-messages'>
-      <li v-for='(message, index) in fileErrorMessages' :key='index'>
+    <div v-if="value" class="uploaded">
+      <div class="buttons">
+        <button type="button" class="delete-button" @click="deleteImg">
+          画像を削除する
+        </button>
+
+        <label v-if="!csvFile" class="upload-content-space user-photo default">
+          <input
+            ref="file"
+            class="file-button"
+            type="file"
+            @change="csvUpload"
+          />
+          csvファイルをアップロードする
+        </label>
+        <button type="button" class="delete-button" @click="deleteCsv">
+          csvファイルを削除する
+        </button>
+
+        <label class="upload-content-space user-photo default">
+          <input class="file-button" @click="postData" />
+          作成する
+        </label>
+      </div>
+      <div class="mae-img">
+        <label class="upload-content-space user-photo">
+          <input
+            ref="file"
+            class="file-button"
+            type="file"
+            @change="imgUpload"
+          />
+          <img class="user-photo-image" :src="value" />
+        </label>
+      </div>
+    </div>
+
+    <ul v-if="fileErrorMessages.length > 0" class="error-messages">
+      <li v-for="(message, index) in fileErrorMessages" :key="index">
         {{ message }}
       </li>
     </ul>
@@ -44,9 +84,8 @@
 
 <script>
 /* eslint-disable */
-
 export default {
-  name: 'Upload',
+  name: "Upload",
   props: {
     value: {
       type: String,
@@ -58,25 +97,25 @@ export default {
       imgFile: null,
       csvFile: null,
       fileErrorMessages: [],
-      message: '', // 入力データを格納する変数。
+      message: "", // 入力データを格納する変数。
       result: null, // 演算結果を格納する変数。
-      state: 'wait', // 現在の状況を格納する変数。
-      image: '',
-      resultImages: []
-    }
+      state: "wait", // 現在の状況を格納する変数。
+      image: "",
+      resultImages: [],
+    };
   },
   methods: {
     // 画像のBase64のデータをバックエンドに送り、バックエンドから演算結果を受け取り、その結果を表示するメソッド
-    postData () {
-      const data = new FormData()
-      data.append('files', this.imgFile, 'img')
-      if(this.csvFile !== null){
-        data.append('files', this.csvFile, 'csv')
+    postData() {
+      const data = new FormData();
+      data.append("files", this.imgFile, "img");
+      if (this.csvFile !== null) {
+        data.append("files", this.csvFile, "csv");
       } else {
         // csvが読み込まれなかった場合にはデフォルトのものを読み込む
-        let blob = new Blob(['no file selected'],{type: 'text/plain'})
-        data.append('files', blob, 'NoFile')
-        console.log('デフォルト')
+        let blob = new Blob(["no file selected"], { type: "text/plain" });
+        data.append("files", blob, "NoFile");
+        console.log("デフォルト");
       }
       const config = {headers: {"content-type": "multipart/form-data",}}
       this.$axios.post('http://localhost:3000/api', data, config)
@@ -96,17 +135,17 @@ export default {
       const file = files[0];
 
       if (this.imgCheckFile(file)) {
-        this.imgFile = file
-        const picture = await this.getBase64(file)
-        this.$emit('input', picture);
+        this.imgFile = file;
+        const picture = await this.getBase64(file);
+        this.$emit("input", picture);
       }
     },
     deleteImg() {
-      this.$emit('input', null);
+      this.$emit("input", null);
       this.$refs.imgFile = null;
     },
     deleteCsv() {
-      this.$refs.csvFile = null
+      this.$refs.csvFile = null;
     },
     async csvUpload(event) {
       const files = event.target.files || event.dataTransfer.files;
@@ -166,17 +205,45 @@ export default {
     },
     getBase64(file) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = () => resolve(reader.result)
-        reader.onerror = error => reject(error)
-      })
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
     },
   },
 };
 </script>
 
 <style scoped>
+.mid-block {
+  display: flex;
+}
+.right-block {
+  width: 50%;
+}
+
+p {
+  writing-mode: vertical-rl;
+  font-size: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: serif;
+}
+.left-block {
+  width: 50%;
+  height: 100%;
+}
+.sample-photo > img {
+  height: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.buttons {
+  display: flex;
+  width: 100%;
+}
+
 .user-photo {
   cursor: pointer;
   outline: none;
@@ -207,7 +274,7 @@ export default {
 }
 
 .user-photo-image {
-  max-width: 85px;
+  max-width: 50%;
   display: block;
 }
 
