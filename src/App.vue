@@ -2,16 +2,19 @@
   <div id="app">
     <upload v-model="picture" />
     <img :src="picture" />
+    <CSV />
   </div>
 </template>
 
 <script>
 import Upload from './components/Upload.vue'
+import CSV from './components/csv.vue'
 
 export default {
   name: 'app',
   components: {
-    Upload
+    Upload,
+    CSV
   },
   data () {
     return {

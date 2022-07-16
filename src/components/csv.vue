@@ -2,28 +2,12 @@
   <div>
     <label v-if="!value" class="upload-content-space user-photo default">
       <input ref="file" class="file-button" type="file" @change="upload" />
-      画像アップロードする
-    </label>
-
-    <button type="button" class="delete-button" @click="deleteImage">
-      削除する
-    </button>
-
-    <label v-if="!value" class="upload-content-space user-photo default">
-      <input ref="file" class="file-button" type="file" @change="upload" />
       csvファイルをアップロードする
     </label>
 
     <button type="button" class="delete-button" @click="deleteImage">
       削除する
     </button>
-
-    <div v-if="value" class="uploaded">
-      <label class="upload-content-space user-photo">
-        <input ref="file" class="file-button" type="file" @change="upload" />
-        <img class="user-photo-image" :src="value" />
-      </label>
-    </div>
 
     <ul v-if="fileErrorMessages.length > 0" class="error-messages">
       <li v-for="(message, index) in fileErrorMessages" :key="index">
@@ -36,7 +20,7 @@
 <script>
 /* eslint-disable */
 export default {
-  name: "Upload",
+  name: "csvUpload",
   props: {
     value: {
       type: String,
@@ -45,32 +29,22 @@ export default {
   },
   data() {
     return {
-      imgFile: null,
-      csvFile: null,
+      file: null,
       fileErrorMessages: [],
     };
   },
   methods: {
-    async imgUpload(event) {
+    async upload(event) {
       const files = event.target.files || event.dataTransfer.files;
       const file = files[0];
 
       if (this.checkFile(file)) {
-        const picture = await this.getBase64(file);
-        this.imgFile=file
-      }
-    },
-    async csvUpload(event) {
-      const files = event.target.files || event.dataTransfer.files;
-      const file = files[0];
-
-      if (this.csvCheckFile(file)) {
-        this.csvFile=file;
+        this.$emit("input", picture);
       }
     },
     deleteImage() {
       this.$emit("input", null);
-      this.$refs.imgFile = null;
+      this.$refs.file = null;
     },
     getBase64(file) {
       return new Promise((resolve, reject) => {
@@ -82,31 +56,7 @@ export default {
     },
     checkFile(file) {
       let result = true;
-      this.fileErrorMessages = [];
-      const SIZE_LIMIT = 5000000; // 5MB
-      // キャンセルしたら処理中断
-      if (!file) {
-        result = false;
-      }
-      // jpeg か png 関連ファイル以外は受付けない
-      if (file.type !== "image/jpeg" && file.type !== "image/png") {
-        this.fileErrorMessages.push(
-          "アップロードできるのは jpeg画像ファイル か png画像ファイルのみです。"
-        );
-        result = false;
-      }
-      // 上限サイズより大きければ受付けない
-      if (file.size > SIZE_LIMIT) {
-        this.fileErrorMessages.push(
-          "アップロードできるファイルサイズは5MBまでです。"
-        );
-        result = false;
-      }
-      return result;
-    },
-    csvCheckFile(file) {
-      let result = true;
-      this.fileErrorMessages = [];
+      this.fileErrorMessages = []
       const SIZE_LIMIT = 5000000; // 5MB
       // キャンセルしたら処理中断
       if (!file) {
@@ -114,16 +64,12 @@ export default {
       }
       // csv 関連ファイル以外は受付けない
       if (file.type !== "text/csv") {
-        this.fileErrorMessages.push(
-          "アップロードできるのは csv画像ファイルのみです。"
-        );
+        this.fileErrorMessages.push('アップロードできるのは csvファイル か png画像ファイルのみです。')
         result = false;
       }
       // 上限サイズより大きければ受付けない
       if (file.size > SIZE_LIMIT) {
-        this.fileErrorMessages.push(
-          "アップロードできるファイルサイズは5MBまでです。"
-        );
+        this.fileErrorMessages.push('アップロードできるファイルサイズは5MBまでです。')
         result = false;
       }
       return result;
