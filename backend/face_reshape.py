@@ -58,7 +58,8 @@ output = io.BytesIO()
 pil_img.save(output, format='PNG')
 img_png = output.getvalue()
 o_img_b64 = base64.b64encode(img_png).decode('utf-8')
-result = {'resultImages':[o_img_b64]}
+img_header = 'data:image/png;base64,'
+result = {'resultImages':[img_header+o_img_b64]}
 
 print(json.dumps(result))
 

@@ -18,6 +18,8 @@ app.get('/api', function(req, res) {
   var {PythonShell} = require('python-shell');
   // var pyshell = new PythonShell('./backend/face_reshape.py');
 
+  console.log('ok')
+
   const options = {
     mode: 'json',
     args: [req.query.image],
