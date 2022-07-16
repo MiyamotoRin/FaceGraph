@@ -1,7 +1,12 @@
 /* eslint-disable */
 
 const express = require('express')
+const multer = require('multer')
+const fs = require('fs')
+const { promisify } = require('util')
+const unlinkAsync = promisify(fs.unlink)
 const bodyParser = require('body-parser')
+// const { fsum } = require('d3')
 const app = express()
 app.use(bodyParser.json())
 
@@ -12,15 +17,31 @@ app.use(function(req, res, next) {
   next();
 });
 
+const storage = multer.diskStorage({
+    destination(req, file, cb) {
+      cb(null, './src/assets/')
+    },
+    filename(req, file, cb) {
+      cb(null, `${Math.random().toString(36).slice(-9)}_${Date.now()}.png`)
+    }
+  })
 
-app.get('/api', function(req, res) {
+const upload = multer({ storage: storage }).single('image')
+
+app.post('/api', upload, async (req, res) =>{
+    pathPython(req, res)
+    console.log('11111')
+})
+
+function pathPython (req, res) {
 
   var {PythonShell} = require('python-shell');
-  // var pyshell = new PythonShell('./backend/face_reshape.py');
+
+  console.log(req.query.image)
 
   const options = {
     mode: 'json',
-    args: [req.query.image],
+    args: [req.file.path],
   }
 
   PythonShell.run('./backend/face_reshape.py', options, function(err, data){
@@ -28,30 +49,13 @@ app.get('/api', function(req, res) {
       console.log(err)
     }else{
       console.log('send!')
+      // Delete the file like normal
+      unlinkAsync(req.file.path)
       res.send({
         resultImages: data[0]['resultImages']   //pythonで実施した演算結果をフロントエンドに返している。
       })
     }
   })
-
-  // pyshell.send(req.query.image); //本コードからpythonコードに'req.query.dat'を入力データとして提供する 
-
-  // pythonコード実施後にpythonから本コードにデータが引き渡される。
-  // pyshell.on('message',  function (data) {
-  //   console.log('return data')
-  //   console.log(typeof(data), data)
-  //   res.send({
-  //     resultImages: data[0]['resultImages']   //pythonで実施した演算結果をフロントエンドに返している。
-  //   })
-  // })
-
-  // end the input stream and allow the process to exit
-  // pyshell.end(function (err,code,signal) {
-  //   if (err) throw err
-  //   console.log('The exit code was: ' + code)
-  //   console.log('The exit signal was: ' + signal)
-  //   console.log('finished')
-  // })
-})
+}
 
 app.listen(3000)

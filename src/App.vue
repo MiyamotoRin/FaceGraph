@@ -2,6 +2,7 @@
   <div id="app">
     <upload v-model="picture" />
     <img :src="picture" />
+    {{picture}}
   </div>
 </template>
 
