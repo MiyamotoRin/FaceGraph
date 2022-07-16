@@ -12,7 +12,7 @@ import Upload from './components/Upload.vue'
 export default {
   name: 'app',
   components: {
-    Upload
+    Upload,
   },
   data () {
     return {

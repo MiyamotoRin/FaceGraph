@@ -1,8 +1,17 @@
 <template>
   <div>
-    <label v-if='!value' class='upload-content-space user-photo default'>
-      <input ref='file' class='file-button' type='file' @change='upload' />
-      アップロードする
+    <label v-if="!value" class="upload-content-space user-photo default">
+      <input ref="file" class="file-button" type="file" @change="upload" />
+      画像アップロードする
+    </label>
+
+    <button type="button" class="delete-button" @click="deleteImage">
+      削除する
+    </button>
+
+    <label v-if="!value" class="upload-content-space user-photo default">
+      <input ref="file" class="file-button" type="file" @change="upload" />
+      csvファイルをアップロードする
     </label>
 
     <button type='button' class='delete-button' @click='deleteImage'>
@@ -36,7 +45,8 @@ export default {
   },
   data() {
     return {
-      file: null,
+      imgFile: null,
+      csvFile: null,
       fileErrorMessages: [],
       message: '', // 入力データを格納する変数。
       result: '', // 演算結果を格納する変数。
@@ -66,18 +76,27 @@ export default {
         .finally(function () {
         })
     },
-    async upload(event) {
+    async imgUpload(event) {
       const files = event.target.files || event.dataTransfer.files;
       const file = files[0];
 
       if (this.checkFile(file)) {
         const picture = await this.getBase64(file);
+        this.imgFile=file
         this.getImage(file)
       }
     },
     deleteImage() {
       this.$emit('input', null);
       this.$refs.file = null;
+    },
+    async csvUpload(event) {
+      const files = event.target.files || event.dataTransfer.files;
+      const file = files[0];
+
+      if (this.csvCheckFile(file)) {
+        this.csvFile=file;
+      }
     },
     getBase64(file) {
       return new Promise((resolve, reject) => {
@@ -89,20 +108,48 @@ export default {
     },
     checkFile(file) {
       let result = true;
-      this.fileErrorMessages = []
+      this.fileErrorMessages = [];
       const SIZE_LIMIT = 5000000; // 5MB
       // キャンセルしたら処理中断
       if (!file) {
         result = false;
       }
       // jpeg か png 関連ファイル以外は受付けない
-      if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-        this.fileErrorMessages.push('アップロードできるのは jpeg画像ファイル か png画像ファイルのみです。')
+      if (file.type !== "image/jpeg" && file.type !== "image/png") {
+        this.fileErrorMessages.push(
+          "アップロードできるのは jpeg画像ファイル か png画像ファイルのみです。"
+        );
         result = false;
       }
       // 上限サイズより大きければ受付けない
       if (file.size > SIZE_LIMIT) {
-        this.fileErrorMessages.push('アップロードできるファイルサイズは5MBまでです。')
+        this.fileErrorMessages.push(
+          "アップロードできるファイルサイズは5MBまでです。"
+        );
+        result = false;
+      }
+      return result;
+    },
+    csvCheckFile(file) {
+      let result = true;
+      this.fileErrorMessages = [];
+      const SIZE_LIMIT = 5000000; // 5MB
+      // キャンセルしたら処理中断
+      if (!file) {
+        result = false;
+      }
+      // csv 関連ファイル以外は受付けない
+      if (file.type !== "text/csv") {
+        this.fileErrorMessages.push(
+          "アップロードできるのは csv画像ファイルのみです。"
+        );
+        result = false;
+      }
+      // 上限サイズより大きければ受付けない
+      if (file.size > SIZE_LIMIT) {
+        this.fileErrorMessages.push(
+          "アップロードできるファイルサイズは5MBまでです。"
+        );
         result = false;
       }
       return result;
