@@ -81,7 +81,9 @@ export default {
       const config = {headers: {"content-type": "multipart/form-data",}}
       this.$axios.post('http://localhost:3000/api', data, config)
         .then(function (res) {
-          this.result = res.data.resultImages
+          this.resultImages = res.data.resultImages
+          console.log('ok')
+          console.log(res.data.resultImages)
         }.bind(this)) // Promise処理を行う場合は.bind(this)が必要
         .catch(function (error) { // バックエンドからエラーが返却された場合に行う処理について
           console.log(error)
@@ -111,7 +113,7 @@ export default {
       const file = files[0];
 
       if (this.csvCheckFile(file)) {
-        this.csvFile=file;
+        this.csvFile = file;
       }
     },
     imgCheckFile(file) {

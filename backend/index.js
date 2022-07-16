@@ -57,7 +57,8 @@ app.post('/api', upload.array('files'), async (req, res) =>{
       // Delete the file like normal
       unlinkAsync(req.files[0].path)
       unlinkAsync(req.files[1].path)
-  
+
+      console.log(data[0]['resultImages'])
       res.send({
         resultImages: data[0]['resultImages']   //pythonで実施した演算結果をフロントエンドに返している。
       })
