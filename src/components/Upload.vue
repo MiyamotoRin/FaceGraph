@@ -1,26 +1,35 @@
 <template>
   <div>
     <label v-if="!value" class="upload-content-space user-photo default">
-      <input ref="file" class="file-button" type="file" @change="upload" />
+      <input ref="file" class="file-button" type="file" @change="imgUpload" />
       画像アップロードする
     </label>
 
-    <button type="button" class="delete-button" @click="deleteImage">
+    <label v-if='imgFile'>{{imgFile}}</label>
+
+    <button type="button" class="delete-button" @click="deleteImg">
       削除する
     </button>
 
     <label v-if="!value" class="upload-content-space user-photo default">
-      <input ref="file" class="file-button" type="file" @change="upload" />
+      <input ref="file" class="file-button" type="file" @change="csvUpload" />
       csvファイルをアップロードする
     </label>
 
-    <button type='button' class='delete-button' @click='deleteImage'>
+    <label v-if='csvFile'>{{csvFile}}</label>
+
+    <button type='button' class='delete-button' @click='deleteCsv'>
       削除する
     </button>
 
+    <label class="upload-content-space user-photo default">
+      <input class="file-button" @click="postData" />
+      作成する
+    </label>
+
     <div v-if='value' class='uploaded'>
       <label class='upload-content-space user-photo'>
-        <input ref='file' class='file-button' type='file' @change='upload' />
+        <input ref='file' class='file-button' type='file' @change='imgUpload' />
         <img class='user-photo-image' :src='value' />
       </label>
     </div>
@@ -35,6 +44,7 @@
 
 <script>
 /* eslint-disable */
+
 export default {
   name: 'Upload',
   props: {
@@ -49,7 +59,7 @@ export default {
       csvFile: null,
       fileErrorMessages: [],
       message: '', // 入力データを格納する変数。
-      result: '', // 演算結果を格納する変数。
+      result: null, // 演算結果を格納する変数。
       state: 'wait', // 現在の状況を格納する変数。
       image: '',
       resultImages: []
@@ -57,20 +67,23 @@ export default {
   },
   methods: {
     // 画像のBase64のデータをバックエンドに送り、バックエンドから演算結果を受け取り、その結果を表示するメソッド
-    getImage (file) {
-      this.state = 'getting data'
+    postData () {
       const data = new FormData()
-      data.append('image', file)
+      data.append('files', this.imgFile, 'img')
+      if(this.csvFile !== null){
+        data.append('files', this.csvFile, 'csv')
+      } else {
+        // csvが読み込まれなかった場合にはデフォルトのものを読み込む
+        let blob = new Blob(['no file selected'],{type: 'text/plain'})
+        data.append('files', blob, 'NoFile')
+        console.log('デフォルト')
+      }
       const config = {headers: {"content-type": "multipart/form-data",}}
-      console.log(data.getAll('image'))
       this.$axios.post('http://localhost:3000/api', data, config)
-        .then(function (response) {
-          this.result = response.data.resultImages
-          this.$emit('input', String(this.result[0]));
-          // this.state = 'done'
+        .then(function (res) {
+          this.result = res.data.resultImages
         }.bind(this)) // Promise処理を行う場合は.bind(this)が必要
         .catch(function (error) { // バックエンドからエラーが返却された場合に行う処理について
-          // this.state = 'ERROR'
           console.log(error)
         })
         .finally(function () {
@@ -80,15 +93,18 @@ export default {
       const files = event.target.files || event.dataTransfer.files;
       const file = files[0];
 
-      if (this.checkFile(file)) {
-        const picture = await this.getBase64(file);
-        this.imgFile=file
-        this.getImage(file)
+      if (this.imgCheckFile(file)) {
+        this.imgFile = file
+        const picture = await this.getBase64(file)
+        this.$emit('input', picture);
       }
     },
-    deleteImage() {
+    deleteImg() {
       this.$emit('input', null);
-      this.$refs.file = null;
+      this.$refs.imgFile = null;
+    },
+    deleteCsv() {
+      this.$refs.csvFile = null
     },
     async csvUpload(event) {
       const files = event.target.files || event.dataTransfer.files;
@@ -98,15 +114,7 @@ export default {
         this.csvFile=file;
       }
     },
-    getBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-      })
-    },
-    checkFile(file) {
+    imgCheckFile(file) {
       let result = true;
       this.fileErrorMessages = [];
       const SIZE_LIMIT = 5000000; // 5MB
@@ -153,6 +161,14 @@ export default {
         result = false;
       }
       return result;
+    },
+    getBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = error => reject(error)
+      })
     },
   },
 };
