@@ -47,20 +47,20 @@ export default {
   },
   methods: {
     // 画像のBase64のデータをバックエンドに送り、バックエンドから演算結果を受け取り、その結果を表示するメソッド
-    getImage (picture) {
+    getImage (file) {
       this.state = 'getting data'
-      const sdata = new FormData()
-      this.image = picture
-      sdata.append('image', this.image)
-      this.$axios.get('http://localhost:3000/api', {params: {image: this.image}})
+      const data = new FormData()
+      data.append('image', file)
+      const config = {headers: {"content-type": "multipart/form-data",}}
+      console.log(data.getAll('image'))
+      this.$axios.post('http://localhost:3000/api', data, config)
         .then(function (response) {
           this.result = response.data.resultImages
-          console.log(this.result)
           this.$emit('input', String(this.result[0]));
           // this.state = 'done'
         }.bind(this)) // Promise処理を行う場合は.bind(this)が必要
         .catch(function (error) { // バックエンドからエラーが返却された場合に行う処理について
-          this.state = 'ERROR'
+          // this.state = 'ERROR'
           console.log(error)
         })
         .finally(function () {
@@ -72,8 +72,7 @@ export default {
 
       if (this.checkFile(file)) {
         const picture = await this.getBase64(file);
-        console.log(typeof(picture))
-        this.getImage(picture)
+        this.getImage(file)
       }
     },
     deleteImage() {
