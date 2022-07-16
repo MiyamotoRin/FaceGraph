@@ -9,6 +9,13 @@ def deal_csv(csv_path):
     #-20 ~ 20 への写像　写像ってナンスか？わかるよね？？
     for c in columns:
         data[c] = 40*(data[c] - data[c].min())/(data[c].max()-data[c].min())-20
+    
+    #columns, indexsの最大数の制限
+    # 10個まで
+    if(len(columns) > 10):
+        columns = columns[0:10]
+    if(len(indexs) > 10):
+        indexs = indexs[0:10]
 
-        #[[0行0列, 0行1列, 0行2列], [1行0列, 1行1列, 1行2列], ...]を返す
+
     return data, columns, indexs
