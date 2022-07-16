@@ -16,16 +16,16 @@ app.use(function(req, res, next) {
 app.get('/api', function(req, res) {
 
   var {PythonShell} = require('python-shell');
-  // var pyshell = new PythonShell('./backend/sample.py');
+  // var pyshell = new PythonShell('./backend/face_reshape.py');
 
   const options = {
     mode: 'json',
     args: [req.query.image],
   }
 
-  PythonShell.run('./backend/sample.py', options, function(err, data){
+  PythonShell.run('./backend/face_reshape.py', options, function(err, data){
     if(err){
-      console.log('err')
+      console.log(err)
     }else{
       console.log('send!')
       res.send({
@@ -36,7 +36,7 @@ app.get('/api', function(req, res) {
 
   // pyshell.send(req.query.image); //本コードからpythonコードに'req.query.dat'を入力データとして提供する 
 
-  //pythonコード実施後にpythonから本コードにデータが引き渡される。
+  // pythonコード実施後にpythonから本コードにデータが引き渡される。
   // pyshell.on('message',  function (data) {
   //   console.log('return data')
   //   console.log(typeof(data), data)
