@@ -6,7 +6,7 @@ import mediapipe as mp
 video_file = "分析したい動画の絶対パス"
 # 動画を読み込む
 #エラー出たらVideoCapture(0)や2とかにしてみる
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 pTime = 0
 # モジュールの準備
 mpDraw = mp.solutions.drawing_utils
