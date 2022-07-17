@@ -228,8 +228,8 @@ def merge_image(new_img,dst,face_plot):
         img_header = 'data:image/png;base64,'
         img_tmp = [indexs[i] , img_header+o_img_b64]
         result_images.append(imp_tmp)
-    #{'resultImages':[[ラベル, 画像]], 'columns':[csvのcolumn], 'message':'error mes'}
-    result = {'resultImages':result_images, 'columns':columns, 'message':'text'}
+    #{'resultImages':[[ラベル, 画像]], 'columns':[csvのcolumn], 'messages':["text","text"]}
+    result = {'resultImages':result_images, 'columns':columns, 'messages':err_msgs}
 
 
     # pil_img = Image.fromarray(new_img)
