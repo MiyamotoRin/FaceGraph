@@ -33,11 +33,12 @@ def deal_csv(csv_path):
                 raise ValueError(col+" is not num data")
 
         #-20 ~ 20 への写像，columns,indexsの最大数を制限
-
-        return mapping_df(data, columns, indexs), None
+        text = None
+        return mapping_df(data)
 
     #error時はこちらで用意したデフォルトのcsvデータを読み込む
     except Exception as e:
         default_csv_path = "../src/assets/default.csv"
         data = pd.read_csv(default_csv_path, encoding="shift jis", index_col=0)
-        return mapping_df(data), "CSV ERROR: csvを正常に読み込めませんでした。"
+        text = "CSV ERROR: csvを正常に読み込めませんでした。"
+        return mapping_df(data)
