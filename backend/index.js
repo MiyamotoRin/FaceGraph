@@ -1,8 +1,14 @@
 /* eslint-disable */
 
 const express = require('express')
+const path = require('path')
+const multer = require('multer')
+const fs = require('fs')
+const { promisify } = require('util')
+const unlinkAsync = promisify(fs.unlink)
 const bodyParser = require('body-parser')
 const app = express()
+const updir = "/src/assets";  //  "./src/assets" をアップロード先にしている。
 app.use(bodyParser.json())
 
 // CORSポリシーを無効にしている。
@@ -12,46 +18,52 @@ app.use(function(req, res, next) {
   next();
 });
 
+const storage = multer.diskStorage({
+    destination(req, file, cb) {
+      cb(null, './src/assets/')
+    },
+    filename(req, file, cb) {
+      if(file.originalname == 'img'){
+        cb(null, `${Math.random().toString(36).slice(-9)}_${Date.now()}.png`)
+      }else if(file.originalname == 'csv'){
+        cb(null, `${Math.random().toString(36).slice(-9)}_${Date.now()}.csv`)
+      }else if(file.originalname == 'NoFile'){
+        cb(null, `${Math.random().toString(36).slice(-9)}_${Date.now()}.txt`)
+      }
+    }
+  })
 
-app.get('/api', function(req, res) {
+const upload = multer({ storage: storage })
 
+app.post('/api', upload.array('files'), async (req, res) =>{
+  console.log('get!')
   var {PythonShell} = require('python-shell');
-  // var pyshell = new PythonShell('./backend/sample.py');
 
+  csvPath = './src/assets/default.csv'
+  if(req.files[1].originalname=='csv'){
+    csvPath = req.files[1].path
+  }
+  console.log(csvPath)
   const options = {
     mode: 'json',
-    args: [req.query.image],
+    args: [req.files[0].path, csvPath],
   }
-
-  PythonShell.run('./backend/sample.py', options, function(err, data){
+  
+  PythonShell.run('./backend/face_reshape.py', options, function(err, data){
     if(err){
-      console.log('err')
+      console.log(err)
     }else{
       console.log('send!')
+      // Delete the file like normal
+      unlinkAsync(req.files[0].path)
+      unlinkAsync(req.files[1].path)
+      console.log(data)
+      console.log(data[0]['resultImages'])
       res.send({
         resultImages: data[0]['resultImages']   //pythonで実施した演算結果をフロントエンドに返している。
       })
     }
   })
-
-  // pyshell.send(req.query.image); //本コードからpythonコードに'req.query.dat'を入力データとして提供する 
-
-  //pythonコード実施後にpythonから本コードにデータが引き渡される。
-  // pyshell.on('message',  function (data) {
-  //   console.log('return data')
-  //   console.log(typeof(data), data)
-  //   res.send({
-  //     resultImages: data[0]['resultImages']   //pythonで実施した演算結果をフロントエンドに返している。
-  //   })
-  // })
-
-  // end the input stream and allow the process to exit
-  // pyshell.end(function (err,code,signal) {
-  //   if (err) throw err
-  //   console.log('The exit code was: ' + code)
-  //   console.log('The exit signal was: ' + signal)
-  //   console.log('finished')
-  // })
 })
 
 app.listen(3000)
