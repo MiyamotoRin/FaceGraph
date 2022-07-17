@@ -96,18 +96,18 @@ class ClassifyPolymesh:
     
   def array_center(self):
     # 中心の座標を求める
-    # mid_x = (self.array[1][0] + self.array[3][0]) / 2
-    # mid_y = (self.array[1][1] + self.array[3][1]) / 2
-    # center = [mid_x, mid_y]
+    mid_x = (self.array[1][0] + self.array[3][0]) / 2
+    mid_y = (self.array[1][1] + self.array[3][1]) / 2
+    center = [mid_x, mid_y]
     # top_arg = convert_deg(points[0], center)
     # bottom_arg = convert_deg(points[2], center)
-    array = self.array
-    tan = math.tan(convert_deg(array[1], array[3]))
-    a_x = (array[1][1]-array[0][1]+tan*array[0][0]+(array[1][0]/tan))/(tan+(1/tan))
-    a_y = (array[1][0]-array[0][0]+tan*array[0][1]+(array[1][1]/tan))/(tan+(1/tan))
-    b_x = (array[3][1]-array[2][1]+tan*array[2][0]+(array[3][0]/tan))/(tan+(1/tan))
-    b_y = (array[3][0]-array[2][0]+tan*array[2][1]+(array[3][1]/tan))/(tan+(1/tan))
-    center = [(a_x+b_x)/2, (a_y+b_y)/2]
+    # array = self.array
+    # tan = math.tan(convert_deg(array[1], array[3]))
+    # a_x = (array[1][1]-array[0][1]+tan*array[0][0]+(array[1][0]/tan))/(tan+(1/tan))
+    # a_y = (array[1][0]-array[0][0]+tan*array[0][1]+(array[1][1]/tan))/(tan+(1/tan))
+    # b_x = (array[3][1]-array[2][1]+tan*array[2][0]+(array[3][0]/tan))/(tan+(1/tan))
+    # b_y = (array[3][0]-array[2][0]+tan*array[2][1]+(array[3][1]/tan))/(tan+(1/tan))
+    # center = [(a_x+b_x)/2, (a_y+b_y)/2]
     return center
 
   def array_size(self):
