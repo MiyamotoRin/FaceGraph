@@ -38,7 +38,7 @@ def deal_csv(csv_path):
 
     #error時はこちらで用意したデフォルトのcsvデータを読み込む
     except Exception as e:
-        default_csv_path = "../src/assets/default.csv"
+        default_csv_path = "./src/assets/default.csv"
         data = pd.read_csv(default_csv_path, encoding="shift jis", index_col=0)
         text = "CSV ERROR: csvを正常に読み込めませんでした。"
         return mapping_df(data)
