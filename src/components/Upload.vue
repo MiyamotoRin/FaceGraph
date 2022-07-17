@@ -1,36 +1,45 @@
 <template>
   <div>
     <div v-if="!value" class="mid-block">
-      <div class="right-block">
-        <p>貴方の顔<br />&nbsp;歪めてみませんか・・・</p>
-        <label v-if="!value" class="upload-content-space user-photo default">
-          <input
-            ref="file"
-            class="file-button"
-            type="file"
-            @change="imgUpload"
-          />
-          画像を選択する
-        </label>
-
-        <label v-if="!csvFile" class="upload-content-space user-photo default">
-          <input
-            ref="file"
-            class="file-button"
-            type="file"
-            @change="csvUpload"
-          />
-          csvファイルを選択する
-        </label>
-
-        <label v-if="csvFile">{{ csvFile }}</label>
-
-        <label class="upload-content-space user-photo default">
-          <input class="file-button" @click="postData" />
-          作成する
-        </label>
-      </div>
       <div class="left-block">
+        <p>Let's play your face!</p>
+        <div class="left-desc">
+          ア<span>ッ</span>プロードされた顔画像を歪ませる<br/>ことで、様々なデータを表情で<br>視ることができますよ。
+          <br/><br/>csvファイルは<br/>なくても<br/>動くよ<br/>！
+        </div>
+        <div class="left-buttons">
+          <label v-if="!value" class="upload-content-space user-photo default">
+            <input
+              ref="file"
+              class="file-button"
+              type="file"
+              @change="imgUpload"
+            />
+            画像を選択
+          </label>
+
+          <label
+            v-if="!csvFile"
+            class="upload-content-space user-photo default"
+          >
+            <input
+              ref="file"
+              class="file-button"
+              type="file"
+              @change="csvUpload"
+            />
+            csvファイルを選択
+          </label>
+
+          <label v-if="csvFile">{{ csvFile }}</label>
+
+          <label class="upload-content-space user-photo default">
+            <input class="file-button" @click="postData" />
+            作成
+          </label>
+        </div>
+      </div>
+      <div class="right-block">
         <div class="sample-photo">
           <img src="../assets/sampleDistort.png" />
         </div>
@@ -39,26 +48,26 @@
 
     <div v-if="value" class="uploaded">
       <div class="buttons">
-        <button type="button" class="delete-button" @click="deleteImg">
-          画像を削除する
+        <button type="button" class="button-space delete-button" @click="deleteImg">
+          画像を削除
         </button>
 
-        <label v-if="!csvFile" class="upload-content-space user-photo default">
+        <label v-if="!csvFile" class="button-space user-photo default">
           <input
             ref="file"
             class="file-button"
             type="file"
             @change="csvUpload"
           />
-          csvファイルをアップロードする
+          csvファイルを選択
         </label>
-        <button type="button" class="delete-button" @click="deleteCsv">
-          csvファイルを削除する
+        <button type="button" class="button-space delete-button" @click="deleteCsv">
+          csvファイルを削除
         </button>
 
-        <label class="upload-content-space user-photo default">
+        <label class="button-space user-photo default">
           <input class="file-button" @click="postData" />
-          作成する
+          作成
         </label>
       </div>
       <div class="mae-img">
@@ -71,6 +80,11 @@
           />
           <img class="user-photo-image" :src="value" />
         </label>
+      </div>
+      <div v-if="resultImages.length" class="procImages">
+        <span v-for="(resultImage, index) in resultImages" :key="index">
+          <img :src="resultImage" />
+        </span>
       </div>
     </div>
 
@@ -117,18 +131,21 @@ export default {
         data.append("files", blob, "NoFile");
         console.log("デフォルト");
       }
-      const config = {headers: {"content-type": "multipart/form-data",}}
-      this.$axios.post('http://localhost:3000/api', data, config)
-        .then(function (res) {
-          this.resultImages = res.data.resultImages
-          console.log('ok')
-          console.log(res.data.resultImages)
-        }.bind(this)) // Promise処理を行う場合は.bind(this)が必要
-        .catch(function (error) { // バックエンドからエラーが返却された場合に行う処理について
-          console.log(error)
+      const config = { headers: { "content-type": "multipart/form-data" } };
+      this.$axios
+        .post("http://localhost:3000/api", data, config)
+        .then(
+          function (res) {
+            this.resultImages = res.data.resultImages;
+            console.log("ok");
+            console.log(res.data.resultImages);
+          }.bind(this)
+        ) // Promise処理を行う場合は.bind(this)が必要
+        .catch(function (error) {
+          // バックエンドからエラーが返却された場合に行う処理について
+          console.log(error);
         })
-        .finally(function () {
-        })
+        .finally(function () {});
     },
     async imgUpload(event) {
       const files = event.target.files || event.dataTransfer.files;
@@ -219,54 +236,82 @@ export default {
 .mid-block {
   display: flex;
 }
-.right-block {
-  width: 50%;
+.left-block {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content:space-between;
+  padding-bottom:10px;
+  align-items: center;
+}
+.left-desc{
+  text-align: center;
+  padding:0% 10% 10% 15%;
+  width:100%;
+  font-size:1.2em;
+  color:#2d4059;
+  font-weight: 550;
+  line-height: 110%;
+}
+.left-desc > span{
+  font-size:0.85em;
+}
+.left-buttons{
+  display: flex;
+  margin-bottom:0%;
 }
 
 p {
-  writing-mode: vertical-rl;
   font-size: 50px;
-  margin-left: auto;
-  margin-right: auto;
   font-family: serif;
+  color:#2d4059;
+  font-weight: 600;
 }
-.left-block {
-  width: 50%;
-  height: 100%;
+.right-block {
+  width: 40%;
+  display:flex;
+  justify-content: center;
 }
 .sample-photo > img {
-  height: 100%;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin:20px 0px;
+}
+.procImages {
+  display: flex;
+}
+.procImages > img {
+  width: 75px;
 }
 .buttons {
   display: flex;
   width: 100%;
 }
 
-.user-photo {
+.user-photo.default {
   cursor: pointer;
   outline: none;
-}
-
-.user-photo.default {
   align-items: center;
-  background-color: #0074fb;
-  border: 1px solid #0051b0;
+  background-color: #2d4059;
+  border: 3px solid #bdbdbd;
   border-radius: 2px;
   box-sizing: border-box;
   display: inline-flex;
   font-weight: 600;
   justify-content: center;
   letter-spacing: 0.3px;
-  color: #fff;
+  color: #ffd460;
   height: 4rem;
   padding: 0 1.6rem;
-  max-width: 177px;
+  max-width: 400px;
+  margin: 0px 10px;
+}
+.button-space{
+  margin:0px 20px;
 }
 
 .user-photo.default:hover {
-  background-color: #4c9dfc;
+  background-color: #bdbdbd;
+  border: 3px solid #2d4059;
+  color: #fd8700;
 }
 
 .user-photo.default:active {
@@ -288,19 +333,31 @@ p {
 
 .uploaded {
   align-items: center;
-  display: flex;
 }
 
 .delete-button {
-  background-color: #fff;
-  border: none;
-  color: #0074fb;
-  margin-left: 2rem;
-  padding: 0;
+  cursor: pointer;
+  outline: none;
+  align-items: center;
+  background-color: #2d4059;
+  border: 3px solid #bdbdbd;
+  border-radius: 2px;
+  box-sizing: border-box;
+  display: inline-flex;
+  font-weight: 600;
+  justify-content: center;
+  letter-spacing: 0.3px;
+  color: #ea5455;
+  height: 4rem;
+  padding: 0 1.6rem;
+  max-width: 400px;
+  margin: 0px 10px;
 }
 
 .delete-button:hover {
-  text-decoration: underline;
+  background-color: #bdbdbd;
+  border: 3px solid #2d4059;
+  color: #e62a2a;
 }
 
 .error-messages {
