@@ -49,7 +49,7 @@ app.post('/api', upload.array('files'), async (req, res) =>{
     args: [req.files[0].path, csvPath],
   }
   
-  PythonShell.run('./backend/face_reshape.py', options, function(err, data){
+  PythonShell.run('./backend/demo.py', options, function(err, data){
     if(err){
       console.log(err)
     }else{
