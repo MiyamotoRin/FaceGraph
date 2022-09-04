@@ -36,7 +36,7 @@ img = cv2.imread("src/assets/shaun.jpg")
 err_msgs=[]
 
 #データの読み込み，正規化
-csv_file = "../Book1.csv"
+csv_file = "src/assets/default.csv"
 #pd.dataframe, コラム名，インデックスを返す
 #data[i][j]の大きさがゆがみパラメータ
 data, columns, indexs = deal_csv.deal_csv(csv_file)

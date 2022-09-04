@@ -9,6 +9,7 @@ opencv-python = "*"
 ipywidgets = "*"
 pandas = "*"
 mediapipe = "*"
+flask = "*"
 
 [dev-packages]
 
