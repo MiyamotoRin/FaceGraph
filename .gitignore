@@ -12,3 +12,12 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+#Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+src/assets/*.jpg
+src/assets/*.png
