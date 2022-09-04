@@ -29,6 +29,30 @@ def distorter(img, x_volume, y_volume):
     dst = cv2.cvtColor(dst , cv2.COLOR_BGR2RGB)
     return dst
 
+#画像Path
+#data = sys.argv
+img = cv2.imread("src/assets/shaun.jpg")
+(h, w, c) = img.shape
+err_msgs=[]
+
+#データの読み込み，正規化
+csv_file = "../Book1.csv"
+#pd.dataframe, コラム名，インデックスを返す
+#data[i][j]の大きさがゆがみパラメータ
+data, columns, indexs = deal_csv.deal_csv(csv_file)
+# if(err_msg != None):
+#     err_msgs.append(err_msg)
+
+#顔メッシュ生成 pipeline　（みやりん）
+#顔認識できなかった場合はエラーを出す
+#err_msgs.append(err_msg)
+
+# モジュールの準備
+mpDraw = mp.solutions.drawing_utils
+mpFaceMesh = mp.solutions.face_mesh
+faceMesh = mpFaceMesh.FaceMesh(max_num_faces=1)
+drawSpec = mpDraw.DrawingSpec(thickness=1, circle_radius=2)
+
 def convert_deg(p1, p2):
   # 二点間の座標の差をとって傾きの角度を求める
   diff_x = p1[0] - p2[0]
@@ -96,37 +120,26 @@ class ClassifyPolymesh:
     return size
 def merge_image(new_img,dst,rev_shape,body_parts):
     #new_img,dst,各部位の4頂点の座標(部位以外の部分を0埋めしたもの)を受け取り、4頂点が示す長方形の範囲でnew_imgとdstを合成
-    for y in range(int(body_parts.array_center()[1]-rev_shape[0])):
-        for x in range (int(body_parts.array_center()[0]-rev_shape[1])):
+    arr_center_int = [int(body_parts.array_center()[0]), int(body_parts.array_center()[1])]
+    print(arr_center_int)
+    print(rev_shape)
+    for y in range(-int(rev_shape[0]/2),int(rev_shape[0]/2)):
+        for x in range (-int(rev_shape[1]/2), +int(rev_shape[1]/2)):
             #(0,0,0)のときは何もしない
-            if np.all(dst[int(y+body_parts.array_center()[1])][int(x+body_parts.array_center()[0])] != (0,0,0)):
-                   new_img[y+body_parts.array_center()[1]][x+body_parts.array_center()[0]] = dst[y+body_parts.array_center()[1]][x+body_parts.array_center()[0]]  
+            # try:
+            if np.all(dst[y+int(rev_shape[0]/2)][x+int(rev_shape[1]/2)] != (0,0,0)):
+              new_img[y+arr_center_int[1]][x+arr_center_int[0]] = dst[y+int(rev_shape[0]/2)][x+int(rev_shape[1]/2)]  
+            # except Exception as e:
+            #   print("err")
+            # if np.all(dst[y+arr_center_int[1]][x+arr_center_int[0]] != (0,0,0)):
+            #        new_img[y+arr_center_int[1]][x+arr_center_int[0]] = dst[y+arr_center_int[1]][x+arr_center_int[0]]  
     return new_img
-#画像Path
-data = sys.argv
-img = cv2.imread(data[1])
-(h, w, c) = img.shape
-err_msgs=[]
-
-#データの読み込み，正規化
-csv_file = data[2]
-#pd.dataframe, コラム名，インデックスを返す
-#data[i][j]の大きさがゆがみパラメータ
-data, columns, indexs= deal_csv.deal_csv(csv_file)
-
-#顔メッシュ生成 pipeline　（みやりん）
-#顔認識できなかった場合はエラーを出す
-#err_msgs.append(err_msg)
-
-# モジュールの準備
-mpDraw = mp.solutions.drawing_utils
-mpFaceMesh = mp.solutions.face_mesh
-faceMesh = mpFaceMesh.FaceMesh(max_num_faces=1)
-drawSpec = mpDraw.DrawingSpec(thickness=1, circle_radius=2)
-
-right_eye = ClassifyPolymesh(27, 133, 145, 33)
-left_eye = ClassifyPolymesh(386, 263, 374, 362)
-nose = ClassifyPolymesh(197, 358, 2, 107)
+right_eye = ClassifyPolymesh(27, 244, 230, 124)
+left_eye = ClassifyPolymesh(443, 342, 450, 465)
+nose = ClassifyPolymesh(197, 266, 164, 36)
+# right_eye = ClassifyPolymesh(27, 133, 145, 33)
+# left_eye = ClassifyPolymesh(386, 263, 374, 362)
+# nose = ClassifyPolymesh(195, 358, 2, 49)
 mouse = ClassifyPolymesh(0, 291, 17, 61)
 
 # 点番号用のカウント変数
@@ -161,10 +174,11 @@ cutimg_mouse = rot_cut(imgRGB, deg_mouse, mouse.array_center(), mouse.array_size
 #矩形を切り出す，パーツごとの画像arrを生成
 parts_img=[cutimg_right, cutimg_left, cutimg_nose, cutimg_mouse]
 
+cv2.imwrite("cutimg_nose.jpg",cutimg_nose)
+
 #indexsの数だけ画像を生成
 #最終的に出力される画像の配列
 img_arr=[]
-#ちの追加 rev_shape
 rev_shape=[]
 for index in indexs:
     #歪み適応後の画像配列
@@ -172,6 +186,7 @@ for index in indexs:
     #indexに関したcolumns（属性）の数だけ，dataの値に応じてパーツを歪ませる
     len_half = int(len(columns)/2)
     for i in  range(len_half):
+        dst=[]
         dst = distorter(parts_img[i], 
                         x_volume=data[columns[2*i]][index],
                         y_volume=data[columns[2*i+1]][index]
@@ -182,40 +197,47 @@ for index in indexs:
                             x_volume=data[columns[2*i]][index],
                             y_volume=0.0
                             )
-        
+        cv2.imwrite(index+str(i)+"dst.jpg",dst)
         #歪み適応後の矩形をすべてもとの角度に回転して戻す（みやりん）
+#ちの追加 rev_shape
+
         (hr, wr, cr) = dst.shape
-        #ちの追加 rev_shape
-        rev_shape.append(dst.shape)
+        # rev_shape.append(dst.shape)
+        print(type(rev_shape))
         reverse_canvas_size = int(math.sqrt(hr*hr + wr*wr))
-        reverse = cv2.getRotationMatrix2D([w/2, h/2], -deg_right, 1.0)
-        reverse[0][2] += int(reverse_canvas_size / 2) - (w/2) 
-        reverse[1][2] += int(reverse_canvas_size / 2) - (h/2)
+        reverse = cv2.getRotationMatrix2D([wr/2, hr/2], -deg_right, 1.0)
+        reverse[0][2] += int(reverse_canvas_size / 2) - (wr/2) 
+        reverse[1][2] += int(reverse_canvas_size / 2) - (hr/2)
         revimg = cv2.warpAffine(dst, reverse, [reverse_canvas_size, reverse_canvas_size])
         dst_imgs.append(revimg)
-    
+
+        rev_shape.append(revimg.shape)
+        print("revimg:" +str(type(revimg)))
+        print(np.mean(revimg))
+        cv2.imwrite(index+str(i)+"revimg.jpg",revimg)
     #歪ませたパーツをくっつけて1枚の画像にする（ちのっち）
     new_img= img.copy()
-    new_img = cv2.cvtColor(new_img , cv2.COLOR_BGR2RGB)
-
-
-
+    #new_img = cv2.cvtColor(new_img , cv2.COLOR_BGR2RGB)
+    cv2.imwrite(index+"dst.jpg",dst)
+    print("dst:" +str(type(dst)))
+    
     #for column in  columns:
     #各部位の4点座標を持った配列の格納順は[左上,右上,左下,右下]を想定
     #右目 right_eye_plot
     #if right_eye_el != 0
-    merge_image(new_img,dst,rev_shape[0],right_eye)
+    merge_image(new_img,dst_imgs[0],rev_shape[0],right_eye)
     #左目 left_eye_plot
     #if left_eye_el!=0:
-    merge_image(new_img,dst,rev_shape[1],left_eye)
+    merge_image(new_img,dst_imgs[1],rev_shape[1],left_eye)
     #鼻 nose_plot
     #if nose_el != 0:
-    merge_image(new_img,dst,rev_shape[2],nose)
+    merge_image(new_img,dst_imgs[2],rev_shape[2],nose)
     #口 mouth_plot
     #if mouth_el!= 0:
-    merge_image(new_img,dst,rev_shape[3],mouse)
+    #merge_image(new_img,dst,rev_shape[3],mouse)
 
     img_arr.append(new_img)
+    cv2.imwrite(index+"new_img.jpg",new_img)
 
 
 
@@ -235,11 +257,11 @@ for i in range(len(indexs)):
 result = {'resultImages':result_images, 'columns':columns, 'messages':err_msgs}
 
 
-# pil_img = Image.fromarray(new_img)
-# output = io.BytesIO()
-# pil_img.save(output, format='PNG')
-# img_png = output.getvalue()
-# o_img_b64 = base64.b64encode(img_png).decode('utf-8')
-# img_header = 'data:image/png;base64,'
-# result = {'resultImages':[img_header+o_img_b64]}
+    # pil_img = Image.fromarray(new_img)
+    # output = io.BytesIO()
+    # pil_img.save(output, format='PNG')
+    # img_png = output.getvalue()
+    # o_img_b64 = base64.b64encode(img_png).decode('utf-8')
+    # img_header = 'data:image/png;base64,'
+    # result = {'resultImages':[img_header+o_img_b64]}
 print(json.dumps(result))

@@ -33,8 +33,13 @@ def deal_csv(csv_path):
                 raise ValueError(col+" is not num data")
 
         #-20 ~ 20 への写像，columns,indexsの最大数を制限
+<<<<<<< HEAD
+
+        return mapping_df(data), None
+=======
         text = None
         return mapping_df(data)
+>>>>>>> origin/HEAD
 
     #error時はこちらで用意したデフォルトのcsvデータを読み込む
     except Exception as e:
